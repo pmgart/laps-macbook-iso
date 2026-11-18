@@ -30,6 +30,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Compile
-        run: python3 -m py_compile add-efi-boot.py make-efi-img.py
+        run: python3 -m py_compile add-efi-boot.py legacy/make-efi-img.py
       - name: Kernel detection tests
         run: python3 -m unittest discover -s tests -v

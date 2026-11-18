@@ -39,7 +39,7 @@ qemu: ## QEMU EFI-boot-test av ISO:n (150 s)
 lint: ## ShellCheck + Python-syntax
 	@bash -n *.sh tools/*.sh && echo "✅ bash -n OK"
 	@command -v shellcheck >/dev/null && shellcheck -x -S warning *.sh tools/*.sh && echo "✅ shellcheck OK" || echo "⚠️  shellcheck saknas (apt install shellcheck)"
-	@python3 -m py_compile add-efi-boot.py make-efi-img.py && echo "✅ python OK"
+	@python3 -m py_compile add-efi-boot.py legacy/make-efi-img.py && echo "✅ python OK"
 
 clean: ## Ta bort chroot + cache (behåller ISO:n)
 	@sudo lb clean --purge && echo "✅ chroot/cache borta — ISO:n är orörd"
