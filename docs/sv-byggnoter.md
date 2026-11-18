@@ -1,3 +1,6 @@
+> **Observera:** detta är de ursprungliga svenska byggnoterna från 2026-09-25, flyttade hit
+> oförändrade. Den aktuella, engelska bygginstruktionen finns i [`../README.md`](../README.md).
+
 # LAPS Debian Live — MacBook8,1 ISO
 
 Custom Debian 13 (trixie) live/installer-ISO för 12-tums Retina MacBook (A1534 / MacBook8,1).

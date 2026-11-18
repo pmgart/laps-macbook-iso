@@ -27,7 +27,7 @@ Artefaktregister. Uppdateras varje gång en ny ISO verifieras.
 |---|---|---|
 | `/mnt/Media/Backup/macbook-iso/laps-macbook-debian-trixie.iso` | ISO | sha256 kontrollerad 2026-11-18, OK |
 | `/mnt/Media/Backup/macbook-iso/laps-macbook-debian-trixie.iso.sha256` | checksumma | — |
-| `github.com/pmgart/laps-macbook-iso` (privat) | detta byggsystem | commit `d989b9a` |
+| `github.com/pmgart/laps-macbook-iso` | detta byggsystem | branch `main` |
 
 ## Byggvärd
 

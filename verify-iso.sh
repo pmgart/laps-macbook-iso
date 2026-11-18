@@ -1,10 +1,12 @@
 #!/bin/bash
-# Verifierar laps-debian-live ISO mot MacBook8,1-checklistan.
-# Användning: bash ~/laps-debian-live/verify-iso.sh [path-till-iso]
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Verifierar den byggda ISO:n mot MacBook8,1-checklistan.
+# Användning: bash verify-iso.sh [sökväg-till-iso]
 set -u
-ISO=$(ls ~/laps-debian-live/*.iso 2>/dev/null | head -1)
+BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ISO="$(ls "$BASE"/*.iso 2>/dev/null | head -1)"
 [ -n "${1:-}" ] && ISO="$1"
-[ -n "$ISO" ] && [ -f "$ISO" ] || { echo "❌ Ingen ISO hittad"; exit 1; }
+[ -n "$ISO" ] && [ -f "$ISO" ] || { echo "❌ Ingen ISO hittad (bygg först, eller ange sökväg)"; exit 1; }
 echo "ISO: $ISO ($(du -h "$ISO" | cut -f1))"
 echo "SHA256: $(sha256sum "$ISO" | cut -d' ' -f1)"
 echo
@@ -19,10 +21,10 @@ MNT=$(mktemp -d /tmp/iso-verify.XXXXXX)
 if sudo -n mount -o loop,ro "$ISO" "$MNT" 2>/dev/null; then
   MOUNTED=1
 else
-  echo "(loop-mount kräver sudo — använder 7z/isoinfo-extraktion istället)"
+  echo "(loop-mount kräver sudo — använder 7z-extraktion istället)"
   EXTRACT=$(mktemp -d /tmp/iso-extract.XXXXXX)
-  if command -v 7z >/dev/null; then 7z x -y -o"$EXTRACT" "$ISO" >/dev/null 2>&1; EXTRACTED=1;
-  elif command -v bsdtar >/dev/null; then bsdtar -x -f "$ISO" -C "$EXTRACT" 2>/dev/null; EXTRACTED=1; fi
+  if command -v 7z >/dev/null; then 7z x -y -o"$EXTRACT" "$ISO" >/dev/null 2>&1;
+  elif command -v bsdtar >/dev/null; then bsdtar -x -f "$ISO" -C "$EXTRACT" 2>/dev/null; fi
   MNT="$EXTRACT"
 fi
 
@@ -30,6 +32,8 @@ check "GRUB live-meny innehåller initcall_blacklist=dw_pci_driver_init" \
   "grep -rqs 'initcall_blacklist=dw_pci_driver_init' $MNT/boot/grub/ $MNT/boot/live/"
 check "Installer-kärna (vmlinuz) finns i ISO" "ls $MNT/install.* >/dev/null 2>&1 || find $MNT -name 'vmlinuz*' | grep -q ."
 check "Live-squashfs finns" "find $MNT -name 'filesystem.squashfs' | grep -q ."
+check "EFI-boot: boot/grub/efi.img finns" "test -f $MNT/boot/grub/efi.img"
+check "EFI-boot: EFI/boot/bootx64.efi finns" "test -f $MNT/EFI/boot/bootx64.efi"
 
 SQUASH=$(find $MNT -name 'filesystem.squashfs' | head -1)
 if [ -n "$SQUASH" ] && command -v unsquashfs >/dev/null; then
@@ -50,4 +54,9 @@ fi
 rm -rf "$MNT" 2>/dev/null
 echo
 echo "RESULTAT: $PASS ✅ / $FAIL ❌"
-[ "$FAIL" -eq 0 ] && echo "🎉 ISO verifierad — klar för BalenaEtcher" || echo "⚠️  Åtgärda felen innan flashning"
+if [ "$FAIL" -eq 0 ]; then
+  echo "🎉 ISO verifierad — klar för flashning (BalenaEtcher / dd)"
+else
+  echo "⚠️  Åtgärda felen innan flashning"
+  exit 1
+fi

@@ -19,5 +19,9 @@
 /build-status.log
 /wget-log.*
 
-# --- värdberoende som installeras lokalt (se tools/setup-host-deps.sh) ---
+# --- diverse ---
 /tools/*.bin.local
+__pycache__/
+*.pyc
+.venv/
+

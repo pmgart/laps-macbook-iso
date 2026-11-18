@@ -1,0 +1,6 @@
+# Byte-order och radslut: allt är LF, binärer rörs inte
+* text=auto eol=lf
+*.bin binary
+*.iso binary
+*.py text eol=lf
+*.sh text eol=lf
