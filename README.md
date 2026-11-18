@@ -109,6 +109,10 @@ checksum:
 
 Verify any copy with `sha256sum -c` against the `.sha256` file, or just `make verify`.
 
+GitHub caps release assets at 2 GiB, below this image's 3.0 GB, so the binary is not
+attached here. Either build it from this repository, or verify a copy you were given
+against the checksum above — an image that does not match is not the image described here.
+
 **Honest status:** the image boots correctly under QEMU/OVMF with the SPI parameter on the
 kernel command line, and its squashfs contents have been verified. As of the last update it
 has **not** been booted on a physical MacBook8,1, and no full install on the real machine
