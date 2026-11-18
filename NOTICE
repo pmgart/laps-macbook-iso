@@ -1,0 +1,18 @@
+LAPS MacBook8,1 Debian ISO build system
+Copyright (C) 2026 Pablo Magana / LAPS AB <https://laps.se>
+
+This program is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License (LICENSE) for more details.
+
+Derived material
+- config/ is derived from the configuration templates shipped with live-build
+  (Copyright 2006-2012 Daniel Baumann, GPL-3+).
+- config/includes.chroot/opt/macbook8-1-debian-guide/ is a frozen copy of
+  https://github.com/pmgart/macbook8-1-debian-guide (same author, same licence).
+- tools/isohdpfx.bin is the 432-byte isohybrid MBR blob from the Debian archive
+  (debian-cd / isolinux, GPL-2+ with the usual Debian licensing).
