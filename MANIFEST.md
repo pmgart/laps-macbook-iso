@@ -21,6 +21,14 @@ Artefaktregister. Uppdateras varje gång en ny ISO verifieras.
 | `EFI/boot/bootx64.efi` | 897 024 byte (grub-mkstandalone) |
 | `boot/grub/grub.cfg` | 1 071 byte (5 menyposter, SPI-fix i alla) |
 
+## Arkiverad kopia
+
+| Plats | Innehåll | Status |
+|---|---|---|
+| `/mnt/Media/Backup/macbook-iso/laps-macbook-debian-trixie.iso` | ISO | sha256 kontrollerad 2026-11-18, OK |
+| `/mnt/Media/Backup/macbook-iso/laps-macbook-debian-trixie.iso.sha256` | checksumma | — |
+| `github.com/pmgart/laps-macbook-iso` (privat) | detta byggsystem | commit `d989b9a` |
+
 ## Byggvärd
 
 | Komponent | Version |
