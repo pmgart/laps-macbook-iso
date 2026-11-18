@@ -1,0 +1,4 @@
+# LAPS live-build: lösenordsfri sudo ENBART för ISO-byggskriptet.
+# Ger agenten möjlighet att starta/omstarta ~/laps-debian-live/build-laps-debian.sh
+# UTAN att Pablos lösenord behövs. Inga andra root-rättigheter beviljas.
+pablo-magana ALL=(root) NOPASSWD: /home/pablo-magana/laps-debian-live/build-laps-debian.sh

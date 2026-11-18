@@ -1,0 +1,36 @@
+#!/bin/bash
+# LAPS 4-DE hook: SDDM som enda display manager (X11 + Wayland-sessioner).
+
+# Ta bort andra display managers (task-paket kan dra in dem):
+for dm in gdm3 lightdm lxdm slim; do
+  if dpkg -l "$dm" 2>/dev/null | grep -q '^ii'; then
+    echo "Tar bort $dm (SDDM tar över)"
+    apt-get -y purge "$dm" 2>/dev/null || true
+  fi
+done
+
+# SDDM som vald DM:
+if [ -d /etc/X11 ]; then
+  echo /usr/bin/sddm > /etc/X11/default-display-manager
+fi
+
+# SDDM-konfig: greeter på Wayland (labwc finns ej — använd kwin_wayland från KDE):
+mkdir -p /etc/sddm.conf.d
+cat > /etc/sddm.conf.d/laps.conf <<'EOT'
+[General]
+DisplayServer=x11
+EOT
+
+# Polkit-agent för Sway (KDE:s agent följer med task-kde-desktop):
+mkdir -p /etc/sway/laps
+cat > /etc/sway/laps/start-laps-session <<'EOT'
+#!/bin/bash
+if [ -x /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1 ]; then
+  /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1 &
+elif command -v lxpolkit >/dev/null 2>&1; then
+  lxpolkit &
+fi
+EOT
+chmod +x /etc/sway/laps/start-laps-session
+
+echo "✅ SDDM + 4-DE sessioner konfigurerade"

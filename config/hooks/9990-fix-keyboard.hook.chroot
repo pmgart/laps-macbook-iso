@@ -1,0 +1,36 @@
+#!/bin/bash
+# LAPS Debian live — hook körs i chroot under build.
+# 1) SPI/PIO-fixen i live-systemets GRUB (tangentbord fungerar i live-läget — backup till boot-append)
+# 2) Svensk layout som X11-standard
+# 3) Svensk §/<>-xmodmapfix som Xsession.d-hook (alla X11-inloggningar)
+
+echo "LAPS_ALL_DESKTOPS" > /etc/hostname
+
+# --- SPI-fix i GRUB (live-läget; installerat system fixas av installer-late-script) ---
+if [ -f /etc/default/grub ]; then
+  cp -a /etc/default/grub /etc/default/grub.before-mb81
+  grep -q 'initcall_blacklist=dw_pci_driver_init' /etc/default/grub || \
+    sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"|GRUB_CMDLINE_LINUX_DEFAULT="initcall_blacklist=dw_pci_driver_init \1"|' /etc/default/grub
+  grep -q 'GRUB_CMDLINE_LINUX_DEFAULT' /etc/default/grub || \
+    echo 'GRUB_CMDLINE_LINUX_DEFAULT="initcall_blacklist=dw_pci_driver_init quiet"' >> /etc/default/grub
+fi
+
+# --- Svensk layout som X11-standard ---
+mkdir -p /etc/X11/xorg.conf.d
+cat > /etc/X11/xorg.conf.d/00-keyboard.conf <<'EOF'
+Section "InputClass"
+        Identifier "keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "se"
+EndSection
+EOF
+
+# --- Svensk §/<>-fix (MacBook8,1 SPI) vid varje X11-inloggning ---
+mkdir -p /etc/X11/Xsession.d
+cat > /etc/X11/Xsession.d/95mb81-swedish-keys <<'XEOF'
+# MacBook8,1 Swedish layout: swap section/less-greater keys (verified fix)
+case "$DISPLAY" in :*) xmodmap -e 'keycode 49 = less greater less greater bar brokenbar bar' \
+                        -e 'keycode 94 = section degree section degree notsign notsign notsign' 2>/dev/null ;; esac
+XEOF
+
+echo "✅ mb81 hook klar: SPI-grub + svensk layout + §/<>-fix"

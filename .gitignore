@@ -1,0 +1,23 @@
+# --- live-build arbetskatalog (stora, regenererbara) ---
+/chroot/
+/cache/
+/.build/
+.lock
+.build-done
+
+# --- byggresultat ---
+*.iso
+*.iso.sha256
+*.zsync
+/binary/
+/binary.*
+/chroot.packages.*
+/chroot.headers
+/binary.log
+/build.log
+/build-*.log
+/build-status.log
+/wget-log.*
+
+# --- värdberoende som installeras lokalt (se tools/setup-host-deps.sh) ---
+/tools/*.bin.local

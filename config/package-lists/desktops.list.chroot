@@ -1,0 +1,56 @@
+# LAPS MacBook Debian — 4 desktop-miljöer (Cinnamon, XFCE, KDE Plasma, Sway)
+# Val sker vid inloggningsdialogen (SDDM) — live och installerat system.
+
+# --- Display manager: hanterar X11- OCH Wayland-sessioner (Sway kräver Wayland) ---
+sddm
+
+# --- Cinnamon (X11) ---
+task-cinnamon-desktop
+
+# --- XFCE (X11) ---
+task-xfce-desktop
+
+# --- KDE Plasma (X11 + Wayland-sessioner) ---
+task-kde-desktop
+
+# --- Sway (Wayland, tiling) ---
+sway
+swaylock
+swayidle
+swaybg
+wmenu
+foot
+grim
+slurp
+xwayland
+
+# --- Session-hantering gemensamt ---
+dbus-x11
+xorg
+xserver-xorg-input-libinput
+polkitd
+pkexec
+
+# --- Firmware (Broadcom = MacBook Wi-Fi) ---
+firmware-brcm80211
+
+# --- Kernel ---
+linux-image-amd64
+
+# --- Nätverk ---
+network-manager
+wireless-tools
+wpasupplicant
+iw
+
+# --- Basverktyg ---
+task-english
+task-swedish
+task-laptop
+sudo
+curl
+wget
+git
+rsync
+htop
+nano

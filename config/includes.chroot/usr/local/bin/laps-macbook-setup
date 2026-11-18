@@ -1,0 +1,90 @@
+#!/bin/bash
+# ============================================================
+# laps-macbook-setup — MacBook8,1 fullfix på installerad Debian 13
+# Kör de gated-skript som finns i /opt/macbook8-1-debian-guide
+# (GitHub: pmgart/macbook8-1-debian-guide).
+#
+# Regler (från repots AGENTS.md):
+#  - Verifiera DMI-modell först. Avbryt om maskinen inte är MacBook8,1.
+#  - Ett steg i taget, bekräftelse innan varje privilegierad åtgärd.
+#  - Avbryt vid första fel; visa exakt output.
+# ============================================================
+set -u
+
+REPO=/opt/macbook8-1-debian-guide
+
+echo "=== LAPS MacBook8,1-setup ==="
+
+# --- Gate 0: modellkontroll ---
+VENDOR=$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null || true)
+PRODUCT=$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)
+if [ "$VENDOR" != "Apple Inc." ] || [ "$PRODUCT" != "MacBook8,1" ]; then
+  echo "❌ DENNA MASKIN ÄR INTE MacBook8,1 (vendor=$VENDOR product=$PRODUCT)."
+  echo "   SPI-fixen och ljudfixen får ENDAST användas på MacBook8,1. Avbryter."
+  exit 1
+fi
+echo "✅ Modell bekräftad: Apple MacBook8,1"
+
+# --- Gate 1: repo finns och är aktuellt ---
+if [ ! -d "$REPO" ]; then
+  echo "❌ $REPO saknas. Klona: git clone https://github.com/pmgart/macbook8-1-debian-guide.git $REPO"
+  exit 1
+fi
+cd "$REPO" || exit 1
+
+echo
+echo "Denna meny kör repots verifierade skript. Allt kan rullas tillbaka"
+echo "med respektive restore-skript. Ingenting körs utan din bekräftelse."
+PS3="Vad vill du göra? "
+options=(
+  "Tangentbord/styrplatta: SPI/PIO GRUB-fix (kräver omstart)"
+  "Wi-Fi: kontrollera firmware-brcm80211"
+  "Ljud: installera CS4208-högtalarfix (audio/scripts)"
+  "Sömn/hibernate: installera SPI-resume-hook (sleep/scripts)"
+  "Webbkamera: installera FaceTime HD-driver (camera/scripts)"
+  "Kontrollera status (read-only diagnostik)"
+  "Avsluta"
+)
+select opt in "${options[@]}"; do
+  case "$opt" in
+    "Tangentbord/styrplatta: SPI/PIO GRUB-fix (kräver omstart)")
+      read -r -p "Lägga till initcall_blacklist=dw_pci_driver_init i /etc/default/grub och köra update-grub? [j/N] " a
+      [ "$a" = "j" ] || continue
+      sudo bash -c 'grep -q initcall_blacklist=dw_pci_driver_init /etc/default/grub || (cp -a /etc/default/grub /etc/default/grub.before-mb81.$(date +%s) && sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"|GRUB_CMDLINE_LINUX_DEFAULT=\"initcall_blacklist=dw_pci_driver_init |" /etc/default/grub && /usr/sbin/update-grub)'
+      echo "✅ Klart. Starta om och testa tangentbordet."
+      ;;
+    "Wi-Fi: kontrollera firmware-brcm80211")
+      dpkg -l firmware-brcm80211 2>/dev/null | tail -1 || sudo apt install -y firmware-brcm80211
+      nmcli device status
+      ;;
+    "Ljud: installera CS4208-högtalarfix (audio/scripts)")
+      echo "Följer repots gated-runbook. Läs först docs/audio/AI_RUNBOOK.md."
+      read -r -p "Köra audio/scripts/build-driver.sh sedan install-driver.sh? [j/N] " a
+      [ "$a" = "j" ] || continue
+      sudo apt install -y dkms linux-headers-amd64
+      bash audio/scripts/build-driver.sh && sudo bash audio/scripts/install-driver.sh
+      echo "→ Verifiera med audio/scripts/verify-speakers.sh efter omstart."
+      ;;
+    "Sömn/hibernate: installera SPI-resume-hook (sleep/scripts)")
+      read -r -p "Installera sleep-hook enligt sleep/docs/README.md? [j/N] " a
+      [ "$a" = "j" ] || continue
+      sudo bash -c 'install -m 0644 sleep/scripts/mb81-sleep.conf /etc/systemd/sleep.conf.d/ 2>/dev/null || (mkdir -p /etc/systemd/sleep.conf.d && install -m 0644 sleep/scripts/mb81-sleep.conf /etc/systemd/sleep.conf.d/mb81-sleep.conf); mkdir -p /etc/systemd/system.conf.d && install -m 0644 sleep/scripts/mb81-logind.conf /etc/systemd/system.conf.d/mb81-logind.conf 2>/dev/null || true; install -m 0755 sleep/scripts/mb81-applespi /usr/lib/systemd/system-sleep/mb81-applespi'
+      echo "✅ Installerat. Kräver swap-partition för hibernate (GRUB resume=UUID)."
+      ;;
+    "Webbkamera: installera FaceTime HD-driver (camera/scripts)")
+      read -r -p "Köra camera/scripts/install-camera.sh? (hämtar firmware, kräver nätverk) [j/N] " a
+      [ "$a" = "j" ] || continue
+      sudo bash camera/scripts/install-camera.sh
+      echo "→ Verifiera: ls /dev/video* och v4l2-ctl --list-formats-ext"
+      ;;
+    "Kontrollera status (read-only diagnostik)")
+      echo "--- DMI ---"; cat /sys/class/dmi/id/product_name
+      echo "--- cmdline ---"; cat /proc/cmdline
+      echo "--- SPI-enheter ---"; grep -E '^N: Name="Apple SPI' /proc/bus/input/devices || echo "INGA SPI-inputs!"
+      echo "--- video ---"; ls -l /dev/video* 2>/dev/null || echo "ingen /dev/video*"
+      echo "--- ljud ---"; wpctl status 2>/dev/null | grep -A4 'Sinkar\|Sinks' | head -8
+      ;;
+    "Avsluta") break ;;
+    *) echo "Ogiltigt val." ;;
+  esac
+done
