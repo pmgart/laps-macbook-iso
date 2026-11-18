@@ -188,7 +188,8 @@ qemu-test-laps-iso.sh  QEMU EFI boot smoke test
 ## License
 
 [GPL-3.0-or-later](LICENSE). `config/` is derived from live-build's configuration templates
-(GPL-3+), so the repository uses the same licence. The frozen copy of the companion guide in
+(GPL-3+), so the repository uses the same licence. Copyright, derivation and third-party
+attribution are listed in [NOTICE](NOTICE); the frozen copy of the companion guide in
 `config/includes.chroot/opt/macbook8-1-debian-guide/` is by the same author and carries the
 same terms.
 
